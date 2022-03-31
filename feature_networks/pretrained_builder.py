@@ -168,12 +168,12 @@ def _make_vit(model, name):
         start_index=2 if 'deit' in name else 1,
     )
 
-def calc_dims(pretrained, vit=False):
+def calc_dims(pretrained, is_vit=False):
     dims = []
     inp_res = 256
     tmp = torch.zeros(1, 3, inp_res, inp_res)
 
-    if not vit:
+    if not is_vit:
         tmp = pretrained.layer0(tmp)
         dims.append(tmp.shape[1:3])
         tmp = pretrained.layer1(tmp)
@@ -387,15 +387,15 @@ def _make_pretrained(backbone, verbose=False):
         model = timm.create_model(backbone, pretrained=True)
         pretrained = _make_nfnet(model)
 
-    elif backbone in REGNET_MODELS:
+    elif backbone in REGNETS:
         model = timm.create_model(backbone, pretrained=True)
         pretrained = _make_regnet(model)
 
-    elif backbone in EFFICIENTNET_MODELS:
+    elif backbone in EFFNETS:
         model = timm.create_model(backbone, pretrained=True)
         pretrained = _make_efficientnet(model)
 
-    elif backbone in VISION_TRANSFORMER_MODELS:
+    elif backbone in VITS:
         model = timm.create_model(backbone, pretrained=True)
         pretrained = _make_vit(model, backbone)
 
@@ -406,7 +406,7 @@ def _make_pretrained(backbone, verbose=False):
     else:
         raise NotImplementedError('Wrong model name?')
 
-    pretrained.CHANNELS, pretrained.RES_MULT = calc_dims(pretrained, vit=('vit' in backbone or 'deit' in backbone))
+    pretrained.CHANNELS, pretrained.RES_MULT = calc_dims(pretrained, is_vit=backbone in VITS))
 
     if verbose:
         print(f"Succesfully loaded:    {backbone}")
