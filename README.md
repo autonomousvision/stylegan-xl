@@ -26,6 +26,8 @@ If you find our code or paper useful, please cite
 - [ ] Add PTI for inversion
 - [ ] Add StyleMC for editing
 
+The higher resolution models are currently retraining with improved settings, weights will be gradually rolled out. Expected release of the ImageNet256 model is **21.04.2022**.
+
 ## Requirements ##
 - 64-bit Python 3.8 and PyTorch 1.9.0 (or later). See https://pytorch.org for PyTorch install instructions.
 - CUDA toolkit 11.1 or later.
@@ -98,7 +100,7 @@ We provide the following pretrained models (pass the url as `PATH_TO_NETWORK_PKL
  :---  |  ---:  |  ---:  | :---
 ImageNet| 16<sup>2</sup> |0.74| <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet16.pkl`</sub><br>
 ImageNet| 32<sup>2</sup> |1.11| <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet32.pkl`</sub><br>
-ImageNet| 64<sup>2</sup> |1.62| <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet64.pkl`</sub><br>
+ImageNet| 64<sup>2</sup> |1.55| <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet64.pkl`</sub><br>
 ImageNet| 128<sup>2</sup> |1.94| <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet128.pkl`</sub><br>
 CIFAR10| 32<sup>2</sup> |1.85| <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/cifar10.pkl`</sub><br>
 FFHQ| 256<sup>2</sup> |2.19| <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/ffhq256.pkl`</sub><br>
