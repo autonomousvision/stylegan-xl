@@ -406,7 +406,7 @@ def _make_pretrained(backbone, verbose=False):
     else:
         raise NotImplementedError('Wrong model name?')
 
-    pretrained.CHANNELS, pretrained.RES_MULT = calc_dims(pretrained, is_vit=backbone in VITS))
+    pretrained.CHANNELS, pretrained.RES_MULT = calc_dims(pretrained, is_vit=backbone in VITS)
 
     if verbose:
         print(f"Succesfully loaded:    {backbone}")
