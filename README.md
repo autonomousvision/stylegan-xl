@@ -1,6 +1,7 @@
 <img src="misc/banner.png">
 
-#### [[Project]](https://sites.google.com/view/stylegan-xl/) [[PDF]](https://arxiv.org/abs/2202.00273)
+#### [[Project]](https://sites.google.com/view/stylegan-xl/)    [[PDF]](https://arxiv.org/abs/2202.00273)    [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/hysts/StyleGAN-XL)
+
 
 This repository contains code for the paper "StyleGAN-XL: Scaling StyleGAN to Large Diverse Datasets"
 
@@ -19,10 +20,6 @@ If you find our code or paper useful, please cite
 }
 ```
 
-## Web Demo
-
-Integrated into [Huggingface Spaces 🤗](https://huggingface.co/spaces) using [Gradio](https://github.com/gradio-app/gradio). Try out the Web Demo: [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/hysts/StyleGAN-XL)
-
 ## ToDos
 - [x] Initial code release
 - [x] Add pretrained models (ImageNet{16,32,64,128}, FFHQ256, Pokemon256) 
@@ -30,7 +27,7 @@ Integrated into [Huggingface Spaces 🤗](https://huggingface.co/spaces) using [
 - [ ] Add PTI for inversion
 - [ ] Add StyleMC for editing
 
-The higher resolution models are currently retraining with improved settings, weights will be gradually rolled out. Expected release of the ImageNet256 model is **21.04.2022**.
+The higher resolution models are currently retraining with improved settings, weights will be gradually rolled out. Expected release of the ImageNet256 model is **14.04.2022**.
 
 ## Requirements ##
 - 64-bit Python 3.8 and PyTorch 1.9.0 (or later). See https://pytorch.org for PyTorch install instructions.
