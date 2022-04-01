@@ -19,6 +19,10 @@ If you find our code or paper useful, please cite
 }
 ```
 
+## Web Demo
+
+Integrated into [Huggingface Spaces 🤗](https://huggingface.co/spaces) using [Gradio](https://github.com/gradio-app/gradio). Try out the Web Demo: [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/hysts/StyleGAN-XL)
+
 ## ToDos
 - [x] Initial code release
 - [x] Add pretrained models (ImageNet{16,32,64,128}, FFHQ256, Pokemon256) 
