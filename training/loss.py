@@ -21,7 +21,6 @@ from torch_utils.ops import upfirdn2d
 import dnnlib
 import legacy
 
-import lpips
 from pg_modules.blocks import Interpolate
 import timm
 from pg_modules.projector import norm_with_stats, get_backbone_normstats

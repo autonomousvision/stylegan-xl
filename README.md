@@ -20,6 +20,9 @@ If you find our code or paper useful, please cite
 }
 ```
 
+## Related Projects ##
+- [Projected GANs Converge Faster](https://github.com/autonomousvision/projected_gan)
+
 ## ToDos
 - [x] Initial code release
 - [x] Add pretrained models (ImageNet{16,32,64,128}, FFHQ256, Pokemon256) 

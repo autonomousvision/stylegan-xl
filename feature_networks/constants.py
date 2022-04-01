@@ -101,7 +101,7 @@ VITS_INCEPTION = [
     'vit_base_patch16_224'
 ]
 
-VITS = VITS_IMAGENET = VITS_INCEPTION
+VITS = VITS_IMAGENET + VITS_INCEPTION
 
 CLIP = [
     'resnet50_clip'
