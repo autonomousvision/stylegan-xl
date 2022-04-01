@@ -76,7 +76,7 @@ python train.py --outdir=./training-runs/pokemon --cfg=stylegan3-t --data=./data
   --path_stem training-runs/pokemon/00000-stylegan3-t-pokemon16-gpus8-batch64/best_model.pkl
 ```
 
-```--up_factor``` allows to train several stages at once, i.e., with ```--up_factor=4``` and a 16<sup>2</sup> you directly train at resolution  64<sup>2</sup>. 
+```--up_factor``` allows to train several stages at once, i.e., with ```--up_factor=4``` and a 16<sup>2</sup> stem you can directly train at resolution  64<sup>2</sup>. 
 
 If you have enough compute, a good tactic is to train several stages in parallel and then restart the superresolution stage training once in a while. The current stage will then reload its previous stem's ```best_model.pkl```. Performance can sometimes drop at first because of domain shift, but the superresolution stage quickly recovers and improves further.
 
@@ -126,4 +126,4 @@ unzip gan-metrics.zip -d dnnlib/
 ```
 
 ### Further Information
-This repo builds on the codebase of [StyleGAN3](https://github.com/NVlabs/stylegan) and our previous project [Projected GANs Converge Faster](https://github.com/autonomousvision/projected_gan).
+This repo builds on the codebase of [StyleGAN3](https://github.com/NVlabs/stylegan3) and our previous project [Projected GANs Converge Faster](https://github.com/autonomousvision/projected_gan).
