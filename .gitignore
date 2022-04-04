@@ -5,6 +5,7 @@ data
 data/*
 !data/.placeholder
 
+training-runs
 training-runs/*
 out/*
 sample_sheets/*

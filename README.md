@@ -1,4 +1,4 @@
-<img src="misc/banner.png">
+<img src="media/banner.png">
 
 
 #### [[Project]](https://sites.google.com/view/stylegan-xl/)    [[PDF]](https://arxiv.org/abs/2202.00273)    [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/hysts/StyleGAN-XL)
@@ -63,7 +63,7 @@ You need to follow our progressive growing scheme to get the best results. There
 
 ## Training ##
 
-<img src="misc/system.png">
+<img src="media/system.png">
 
 For progressive growing, we train a stem on low resolution, e.g., 16<sup>2</sup> pixels. When the stem is finished, i.e., FID is saturating, you can start training the upper stages; we refer to these as superresolution stages.
 
@@ -98,7 +98,7 @@ If you have enough compute, a good tactic is to train several stages in parallel
 
 
 ## Generating Samples & Interpolations ##
-<img src="misc/teaser.png">
+<img src="media/teaser.png">
 
 To generate samples and interpolation videos, run
 ```
@@ -110,7 +110,7 @@ and
 python gen_video.py --output=lerp.mp4 --trunc=0.7 --seeds=0-31 --grid=4x2 \
   --network=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/pokemon256.pkl
 ```
-For class-conditional models, you can pass the class index via ```--class```, a index-to-label dictionary for Imagenet can be found [here](https://github.com/xl-sr/stylegan_xl_release/blob/main/misc/imagenet_idx2labels.txt).
+For class-conditional models, you can pass the class index via ```--class```, a index-to-label dictionary for Imagenet can be found [here](https://github.com/xl-sr/stylegan_xl_release/blob/main/media/imagenet_idx2labels.txt).
 
 Generating large sample sheets:
 ```
