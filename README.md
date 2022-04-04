@@ -112,15 +112,19 @@ python gen_video.py --output=lerp.mp4 --trunc=0.7 --seeds=0-31 --grid=4x2 \
 ```
 For class-conditional models, you can pass the class index via ```--class```, a index-to-label dictionary for Imagenet can be found [here](https://github.com/xl-sr/stylegan_xl_release/blob/main/media/imagenet_idx2labels.txt).
 
-Generate a conditional sample sheets:
+To generate a conditional sample sheet, run
 ```
 python gen_samplesheet.py --outdir=sample_sheets --trunc=1.0 \
   --network=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet128.pkl \
   --samples-per-class 4 --classes 0-32 --grid-width 32 \\
 ```
 
-For the ImageNet models, we enable multi-modal truncation (as proposed by [self-distilled
-GAN](https://self-distilled-stylegan.github.io/)). To switch from uni- to multi-modal truncation, pass ``` centroids-path=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet_centroids.npy```.
+For the ImageNet models, we enable multi-modal truncation (as proposed by [Self-Distilled
+GAN](https://self-distilled-stylegan.github.io/)). To switch from uni-model to multi-modal truncation, pass
+
+<sub>`--centroids-path=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet_centroids.npy`</sub><br>
+
+## Pretrained Models ##
 
 We provide the following pretrained models (pass the url as `PATH_TO_NETWORK_PKL`):
 
