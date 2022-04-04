@@ -1,12 +1,5 @@
 <img src="misc/banner.png">
 
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-ffhq-256-x-256)](https://paperswithcode.com/sota/image-generation-on-ffhq-256-x-256?p=stylegan-xl-scaling-stylegan-to-large-diverse)
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-cifar-10)](https://paperswithcode.com/sota/image-generation-on-cifar-10?p=stylegan-xl-scaling-stylegan-to-large-diverse)
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-imagenet-32x32)](https://paperswithcode.com/sota/image-generation-on-imagenet-32x32?p=stylegan-xl-scaling-stylegan-to-large-diverse)
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-imagenet-64x64)](https://paperswithcode.com/sota/image-generation-on-imagenet-64x64?p=stylegan-xl-scaling-stylegan-to-large-diverse)
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-imagenet-128x128)](https://paperswithcode.com/sota/image-generation-on-imagenet-128x128?p=stylegan-xl-scaling-stylegan-to-large-diverse)
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-imagenet-256x256)](https://paperswithcode.com/sota/image-generation-on-imagenet-256x256?p=stylegan-xl-scaling-stylegan-to-large-diverse)
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-imagenet-512x512)](https://paperswithcode.com/sota/image-generation-on-imagenet-512x512?p=stylegan-xl-scaling-stylegan-to-large-diverse)
 
 #### [[Project]](https://sites.google.com/view/stylegan-xl/)    [[PDF]](https://arxiv.org/abs/2202.00273)    [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/hysts/StyleGAN-XL)
 
@@ -27,6 +20,14 @@ If you find our code or paper useful, please cite
   url       = {https://arxiv.org/abs/2201.00273},
 }
 ```
+
+|Rank on Papers With Code|  &nbsp;
+ :---  |  :---  
+ [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-imagenet-32x32)](https://paperswithcode.com/sota/image-generation-on-imagenet-32x32?p=stylegan-xl-scaling-stylegan-to-large-diverse)|[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-cifar-10)](https://paperswithcode.com/sota/image-generation-on-cifar-10?p=stylegan-xl-scaling-stylegan-to-large-diverse)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-imagenet-64x64)](https://paperswithcode.com/sota/image-generation-on-imagenet-64x64?p=stylegan-xl-scaling-stylegan-to-large-diverse)|[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-ffhq-256-x-256)](https://paperswithcode.com/sota/image-generation-on-ffhq-256-x-256?p=stylegan-xl-scaling-stylegan-to-large-diverse)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-imagenet-128x128)](https://paperswithcode.com/sota/image-generation-on-imagenet-128x128?p=stylegan-xl-scaling-stylegan-to-large-diverse)|[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-pokemon-256x256)](https://paperswithcode.com/sota/image-generation-on-pokemon-256x256?p=stylegan-xl-scaling-stylegan-to-large-diverse)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-imagenet-256x256)](https://paperswithcode.com/sota/image-generation-on-imagenet-256x256?p=stylegan-xl-scaling-stylegan-to-large-diverse)|
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-imagenet-512x512)](https://paperswithcode.com/sota/image-generation-on-imagenet-512x512?p=stylegan-xl-scaling-stylegan-to-large-diverse)|
 
 ## Related Projects ##
 - [Projected GANs Converge Faster](https://github.com/autonomousvision/projected_gan)
