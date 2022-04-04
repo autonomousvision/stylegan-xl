@@ -124,6 +124,10 @@ GAN](https://self-distilled-stylegan.github.io/)). To switch from uni-model to m
 
 <sub>`--centroids-path=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet_centroids.npy`</sub><br>
 
+|No Truncation| Uni-Modal Truncation | Multi-Modal Truncation
+:---  |  :---:  |  :---:
+<img src="media/no_truncation.png"> | <img src="media/unimodal_truncation.png">| <img src="media/multimodal_truncation.png"> 
+ 
 ## Pretrained Models ##
 
 We provide the following pretrained models (pass the url as `PATH_TO_NETWORK_PKL`):
