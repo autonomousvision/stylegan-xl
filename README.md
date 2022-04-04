@@ -1,5 +1,13 @@
 <img src="misc/banner.png">
 
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-ffhq-256-x-256)](https://paperswithcode.com/sota/image-generation-on-ffhq-256-x-256?p=stylegan-xl-scaling-stylegan-to-large-diverse)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-cifar-10)](https://paperswithcode.com/sota/image-generation-on-cifar-10?p=stylegan-xl-scaling-stylegan-to-large-diverse)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-imagenet-32x32)](https://paperswithcode.com/sota/image-generation-on-imagenet-32x32?p=stylegan-xl-scaling-stylegan-to-large-diverse)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-imagenet-64x64)](https://paperswithcode.com/sota/image-generation-on-imagenet-64x64?p=stylegan-xl-scaling-stylegan-to-large-diverse)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-imagenet-128x128)](https://paperswithcode.com/sota/image-generation-on-imagenet-128x128?p=stylegan-xl-scaling-stylegan-to-large-diverse)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-imagenet-256x256)](https://paperswithcode.com/sota/image-generation-on-imagenet-256x256?p=stylegan-xl-scaling-stylegan-to-large-diverse)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-imagenet-512x512)](https://paperswithcode.com/sota/image-generation-on-imagenet-512x512?p=stylegan-xl-scaling-stylegan-to-large-diverse)
+
 #### [[Project]](https://sites.google.com/view/stylegan-xl/)    [[PDF]](https://arxiv.org/abs/2202.00273)    [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/hysts/StyleGAN-XL)
 
 
@@ -25,7 +33,7 @@ If you find our code or paper useful, please cite
 
 ## ToDos
 - [x] Initial code release
-- [x] Add pretrained models (ImageNet{16,32,64,128}, FFHQ256, Pokemon256) 
+- [x] Add pretrained models (ImageNet{16,32,64,128}, FFHQ256, Pokemon256)
 - [ ] Add higher resolution models (ImageNet{256,512,1024})
 - [ ] Add PTI for inversion
 - [ ] Add StyleMC for editing
@@ -37,6 +45,8 @@ The higher resolution models are currently retraining with improved settings, we
 - CUDA toolkit 11.1 or later.
 - GCC 7 or later compilers. The recommended GCC version depends on your CUDA version; see for example, CUDA 11.4 system requirements.
 - If you run into problems when setting up the custom CUDA kernels, we refer to the [Troubleshooting docs](https://github.com/NVlabs/stylegan3/blob/main/docs/troubleshooting.md#why-is-cuda-toolkit-installation-necessary) of the original StyleGAN3 repo.
+- Windows user struggling installing the env might find https://github.com/autonomousvision/stylegan_xl/issues/10
+  helpful.
 - Use the following commands with Miniconda3 to create and activate your PG Python environment:
   - ```conda env create -f environment.yml```
   - ```conda activate sgxl```
@@ -62,24 +72,26 @@ Training StyleGAN-XL on Pokemon using 8 GPUs:
 
 ```
 python train.py --outdir=./training-runs/pokemon --cfg=stylegan3-t --data=./data/pokemon16.zip \
-    --gpus=8 --batch=64 --mirror=1 --snap 10 --batch-gpu 8 --kimg 10000 --stem --syn_layers 10
+    --gpus=8 --batch=64 --mirror=1 --snap 10 --batch-gpu 8 --kimg 10000 --syn_layers 10
 ```
 ```--batch``` specifies the overall batch size, ```--batch-gpu``` specifies the batch size per GPU. The training loop will automatically accumulate gradients if you use fewer GPUs until the overall batch size is reached.
 
-Samples and metrics are saved in ```outdir```. If you don't want to track metrics, set ```--metrics=none```. You can inspect fid50k_full.json or run tensorboard in ```training-runs/``` to monitor the training progress. 
+Samples and metrics are saved in ```outdir```. If you don't want to track metrics, set ```--metrics=none```. You can inspect fid50k_full.json or run tensorboard in ```training-runs/``` to monitor the training progress.
 
 For a class-conditional dataset (ImageNet, CIFAR-10), add the flag ```--cond True ```. The dataset needs to contain the class labels; see the [StyleGAN2-ADA repo](https://github.com/NVlabs/stylegan2-ada-pytorch) on how to prepare class-conditional datasets.
 
 #### Training the super-resolution stages
 Continuing with pretrained stem:
 ```
-python train.py --outdir=./training-runs/pokemon --cfg=stylegan3-t --data=./data/pokemon32.zip 
-  --gpus=8 --batch=64 --mirror=1 --snap 10 --batch-gpu 8 --kimg 10000 --stem --syn_layers 10 \
+python train.py --outdir=./training-runs/pokemon --cfg=stylegan3-t --data=./data/pokemon32.zip
+  --gpus=8 --batch=64 --mirror=1 --snap 10 --batch-gpu 8 --kimg 10000 --syn_layers 10 \
   --superres --up_factor 2 --head_layers 7 \
   --path_stem training-runs/pokemon/00000-stylegan3-t-pokemon16-gpus8-batch64/best_model.pkl
 ```
 
-```--up_factor``` allows to train several stages at once, i.e., with ```--up_factor=4``` and a 16<sup>2</sup> stem you can directly train at resolution  64<sup>2</sup>. 
+```--up_factor``` allows to train several stages at once, i.e., with ```--up_factor=4``` and a 16<sup>2</sup> stem you can directly train at resolution  64<sup>2</sup>.
+
+For unimodal datasets, we recommend using fewer layers, e.g., ``--head_layers 4```.
 
 If you have enough compute, a good tactic is to train several stages in parallel and then restart the superresolution stage training once in a while. The current stage will then reload its previous stem's ```best_model.pkl```. Performance can sometimes drop at first because of domain shift, but the superresolution stage quickly recovers and improves further.
 
@@ -102,13 +114,13 @@ We provide the following pretrained models (pass the url as `PATH_TO_NETWORK_PKL
 
 |Dataset| Res | FID | PATH
  :---  |  ---:  |  ---:  | :---
-ImageNet| 16<sup>2</sup> |0.74| <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet16.pkl`</sub><br>
-ImageNet| 32<sup>2</sup> |1.11| <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet32.pkl`</sub><br>
-ImageNet| 64<sup>2</sup> |1.55| <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet64.pkl`</sub><br>
-ImageNet| 128<sup>2</sup> |1.94| <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet128.pkl`</sub><br>
-CIFAR10| 32<sup>2</sup> |1.85| <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/cifar10.pkl`</sub><br>
-FFHQ| 256<sup>2</sup> |2.19| <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/ffhq256.pkl`</sub><br>
-Pokemon| 256<sup>2</sup> |23.97| <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/pokemon256.pkl`</sub><br>
+ImageNet| 16<sup>2</sup>  |0.74|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet16.pkl`</sub><br>
+ImageNet| 32<sup>2</sup>  |1.11|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet32.pkl`</sub><br>
+ImageNet| 64<sup>2</sup>  |1.52|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet64.pkl`</sub><br>
+ImageNet| 128<sup>2</sup> |1.82|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet128.pkl`</sub><br>
+CIFAR10 | 32<sup>2</sup>  |1.85|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/cifar10.pkl`</sub><br>
+FFHQ    | 256<sup>2</sup> |2.19|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/ffhq256.pkl`</sub><br>
+Pokemon | 256<sup>2</sup> |23.97| <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/pokemon256.pkl`</sub><br>
 
 ## Quality Metrics ##
 Per default, ```train.py``` tracks FID50k during training. To calculate metrics for a specific network snapshot, run
