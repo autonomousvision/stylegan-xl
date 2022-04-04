@@ -1,14 +1,13 @@
 g++
 gcc
 
-best_models/*
-
 data
 data/*
 !data/.placeholder
 
 training-runs/*
 out/*
+sample_sheets/*
 
 
 *.zip

@@ -103,14 +103,28 @@ If you have enough compute, a good tactic is to train several stages in parallel
 To generate samples and interpolation videos, run
 ```
 python gen_images.py --outdir=out --trunc=0.7 --seeds=10-15 \
-  --network=PATH_TO_NETWORK_PKL
+  --network=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/pokemon256.pkl
 ```
 and
 ```
 python gen_video.py --output=lerp.mp4 --trunc=0.7 --seeds=0-31 --grid=4x2 \
-  --network=PATH_TO_NETWORK_PKL
+  --network=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/pokemon256.pkl
 ```
 For class-conditional models, you can pass the class index via ```--class```, a index-to-label dictionary for Imagenet can be found [here](https://github.com/xl-sr/stylegan_xl_release/blob/main/misc/imagenet_idx2labels.txt).
+
+Generating large sample sheets:
+```
+# unconditional model
+python gen_samplesheet.py --outdir=sample_sheets --trunc=1.0 \
+  --network=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/pokemon256.pkl \
+  --samples-per-class 128
+
+# conditional model
+python gen_samplesheet.py --outdir=sample_sheets --trunc=1.0 \
+  --network=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet128.pkl \
+  --max-classes 100 --samples-per-class 4 --classes-per-row 5
+```
+
 We provide the following pretrained models (pass the url as `PATH_TO_NETWORK_PKL`):
 
 |Dataset| Res | FID | PATH
