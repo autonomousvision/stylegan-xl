@@ -151,7 +151,6 @@ def parse_comma_separated_list(s):
 @click.option('--glr',          help='G learning rate  [default: varies]', metavar='FLOAT',     type=click.FloatRange(min=0))
 @click.option('--dlr',          help='D learning rate', metavar='FLOAT',                        type=click.FloatRange(min=0), default=0.002, show_default=True)
 @click.option('--map-depth',    help='Mapping network depth  [default: varies]', metavar='INT', type=click.IntRange(min=1))
-@click.option('--mbstd-group',  help='Minibatch std group size', metavar='INT',                 type=click.IntRange(min=1), default=4, show_default=True)
 
 # Misc settings.
 @click.option('--desc',         help='String to include in result dir name', metavar='STR',     type=str)
@@ -180,10 +179,8 @@ def main(**kwargs):
     opts = dnnlib.EasyDict(kwargs)  # Command line arguments
     c = dnnlib.EasyDict()  # Main config dict.
     c.G_kwargs = dnnlib.EasyDict(class_name=None, z_dim=512, w_dim=512, mapping_kwargs=dnnlib.EasyDict())
-    c.D_kwargs = dnnlib.EasyDict(class_name='training.networks_stylegan2.Discriminator', block_kwargs=dnnlib.EasyDict(), mapping_kwargs=dnnlib.EasyDict(), epilogue_kwargs=dnnlib.EasyDict())
     c.G_opt_kwargs = dnnlib.EasyDict(class_name='torch.optim.Adam', betas=[0, 0.99], eps=1e-8)
     c.D_opt_kwargs = dnnlib.EasyDict(class_name='torch.optim.Adam', betas=[0, 0.99], eps=1e-8)
-    c.loss_kwargs = dnnlib.EasyDict(class_name='training.loss.StyleGAN2Loss')
     c.data_loader_kwargs = dnnlib.EasyDict(pin_memory=True, prefetch_factor=2)
 
     # Training set.
@@ -197,11 +194,8 @@ def main(**kwargs):
     c.num_gpus = opts.gpus
     c.batch_size = opts.batch
     c.batch_gpu = opts.batch_gpu or opts.batch // opts.gpus
-    c.G_kwargs.channel_base = c.D_kwargs.channel_base = opts.cbase
-    c.G_kwargs.channel_max = c.D_kwargs.channel_max = opts.cmax
-    c.G_kwargs.mapping_kwargs.num_layers = 2
-    c.D_kwargs.block_kwargs.freeze_layers = opts.freezed
-    c.D_kwargs.epilogue_kwargs.mbstd_group_size = opts.mbstd_group
+    c.G_kwargs.channel_base = opts.cbase
+    c.G_kwargs.channel_max = opts.cmax
     c.G_opt_kwargs.lr = (0.002 if opts.cfg == 'stylegan2' else 0.0025) if opts.glr is None else opts.glr
     c.D_opt_kwargs.lr = opts.dlr
     c.metrics = opts.metrics
@@ -216,8 +210,6 @@ def main(**kwargs):
         raise click.ClickException('--batch must be a multiple of --gpus')
     if c.batch_size % (c.num_gpus * c.batch_gpu) != 0:
         raise click.ClickException('--batch must be a multiple of --gpus times --batch-gpu')
-    if c.batch_gpu < c.D_kwargs.epilogue_kwargs.mbstd_group_size:
-        raise click.ClickException('--batch-gpu cannot be smaller than --mbstd')
     if any(not metric_main.is_valid_metric(metric) for metric in c.metrics):
         raise click.ClickException('\n'.join(['--metrics can only contain the following values:'] + metric_main.list_valid_metrics()))
 
@@ -225,11 +217,8 @@ def main(**kwargs):
     c.ema_kimg = c.batch_size * 10 / 32
     if opts.cfg == 'stylegan2':
         c.G_kwargs.class_name = 'training.networks_stylegan2.Generator'
-        c.loss_kwargs.style_mixing_prob = 0.9 # Enable style mixing regularization.
-        c.loss_kwargs.pl_weight = 2 # Enable path length regularization.
-        c.G_reg_interval = 4 # Enable lazy regularization for G.
+        c.G_reg_interval = 4  # Enable lazy regularization for G.
         c.G_kwargs.fused_modconv_default = 'inference_only' # Speed up training by using regular convolutions instead of grouped convolutions.
-        c.loss_kwargs.pl_no_weight_grad = True # Speed up path length regularization by skipping gradient computation wrt. conv2d weights.
 
     elif opts.cfg == 'fastgan':
         c.G_kwargs = dnnlib.EasyDict(class_name='training.networks_fastgan.Generator',
@@ -244,24 +233,22 @@ def main(**kwargs):
         c.G_kwargs.magnitude_ema_beta = 0.5 ** (c.batch_size / (20 * 1e3))
         c.G_kwargs.channel_base *= 2  # increase for StyleGAN-XL
         c.G_kwargs.channel_max *= 2   # increase for StyleGAN-XL
-        if opts.cfg == 'stylegan3-r':
-            c.G_kwargs.conv_kernel = 1  # Use 1x1 convolutions.
-            c.G_kwargs.use_radial_filters = True  # Use radially symmetric downsampling filters.
+        c.G_kwargs.conv_kernel = 1 if opts.cfg == 'stylegan3-r' else 3
+        c.G_kwargs.use_radial_filters = True if opts.cfg == 'stylegan3-r' else False
 
     # Resume.
     if opts.resume is not None:
         c.resume_pkl = opts.resume
         c.ada_kimg = 100  # Make ADA react faster at the beginning.
         c.ema_rampup = None  # Disable EMA rampup.
-        c.loss_kwargs.blur_init_sigma = 0  # Disable blur rampup.
 
     # Restart.
     c.restart_every = opts.restart_every
 
     # Performance-related toggles.
     if opts.fp32:
-        c.G_kwargs.num_fp16_res = c.D_kwargs.num_fp16_res = 0
-        c.G_kwargs.conv_clamp = c.D_kwargs.conv_clamp = None
+        c.G_kwargs.num_fp16_res = 0
+        c.G_kwargs.conv_clamp = None
     if opts.nobench:
         c.cudnn_benchmark = False
 
@@ -270,41 +257,41 @@ def main(**kwargs):
     if opts.desc is not None:
         desc += f'-{opts.desc}'
 
-    ### StyleGAN-XL ###
+    ##################################
+    ########## StyleGAN-XL ###########
+    ##################################
 
-    if opts.stem:
+    # Generator
+    c.G_kwargs.w_dim = 512
+    c.G_kwargs.z_dim = 64
+    c.G_kwargs.mapping_kwargs.rand_embedding = False
+    c.G_kwargs.num_layers = opts.syn_layers
+    c.G_kwargs.mapping_kwargs.num_layers = 2
 
-        # Generator
-        c.G_kwargs.w_dim = 512
-        c.G_kwargs.z_dim = 64
-        c.G_kwargs.mapping_kwargs.rand_embedding = False
-        c.G_kwargs.num_layers = opts.syn_layers
-        c.G_kwargs.mapping_kwargs.num_layers = 2
+    # Discriminator
+    c.D_kwargs = dnnlib.EasyDict(
+        class_name='pg_modules.discriminator.ProjectedDiscriminator',
+        backbones=['deit_base_distilled_patch16_224', 'tf_efficientnet_lite0'],
+        diffaug=True,
+        interp224=(c.training_set_kwargs.resolution < 224),
+        backbone_kwargs=dnnlib.EasyDict(),
+    )
+    c.D_kwargs.backbone_kwargs.cout = 64
+    c.D_kwargs.backbone_kwargs.expand = True
+    c.D_kwargs.backbone_kwargs.proj_type = 2 if c.training_set_kwargs.resolution <= 16 else 2  # CCM only works better on very low resolutions
+    c.D_kwargs.backbone_kwargs.num_discs = 4
+    c.D_kwargs.backbone_kwargs.cond = opts.cond
 
-        # Discriminator
-        c.D_kwargs = dnnlib.EasyDict(
-            class_name='pg_modules.discriminator.ProjectedDiscriminator',
-            backbones=['deit_base_distilled_patch16_224', 'tf_efficientnet_lite0'],
-            diffaug=True,
-            interp224=(c.training_set_kwargs.resolution < 224),
-            backbone_kwargs=dnnlib.EasyDict(),
-        )
-        c.D_kwargs.backbone_kwargs.cout = 64
-        c.D_kwargs.backbone_kwargs.expand = True
-        c.D_kwargs.backbone_kwargs.proj_type = 1 if c.training_set_kwargs.resolution <= 16 else 2  # CCM only works better on very low resolutions
-        c.D_kwargs.backbone_kwargs.num_discs = 4
-        c.D_kwargs.backbone_kwargs.cond = opts.cond
-
-        # Loss
-        c.loss_kwargs = dnnlib.EasyDict(class_name='training.loss.ProjectedGANLoss')
-        c.loss_kwargs.blur_init_sigma = 2  # Blur the images seen by the discriminator.
-        c.loss_kwargs.blur_fade_kimg = 300
-        c.loss_kwargs.pl_weight = 2.0
-        c.loss_kwargs.pl_no_weight_grad = True
-        c.loss_kwargs.style_mixing_prob = 0.0
-        c.loss_kwargs.cls_weight = 0.0  # use classifier guidance only for superresolution training (i.e., with pretrained stem)
-        c.loss_kwargs.cls_model = 'deit_small_distilled_patch16_224'
-        c.loss_kwargs.train_head_only = False
+    # Loss
+    c.loss_kwargs = dnnlib.EasyDict(class_name='training.loss.ProjectedGANLoss')
+    c.loss_kwargs.blur_init_sigma = 2  # Blur the images seen by the discriminator.
+    c.loss_kwargs.blur_fade_kimg = 300
+    c.loss_kwargs.pl_weight = 2.0
+    c.loss_kwargs.pl_no_weight_grad = True
+    c.loss_kwargs.style_mixing_prob = 0.0
+    c.loss_kwargs.cls_weight = 0.0  # use classifier guidance only for superresolution training (i.e., with pretrained stem)
+    c.loss_kwargs.cls_model = 'deit_small_distilled_patch16_224'
+    c.loss_kwargs.train_head_only = False
 
     if opts.superres:
         assert opts.path_stem is not None, "When training superres head, provide path to stem"
@@ -317,30 +304,13 @@ def main(**kwargs):
             up_factor=opts.up_factor,
         )
 
-        # Discriminator
-        c.D_kwargs = dnnlib.EasyDict(
-            class_name='pg_modules.discriminator.ProjectedDiscriminator',
-            backbones=['tf_efficientnet_lite0', 'deit_base_distilled_patch16_224'],
-            diffaug=True,
-            interp224=(c.training_set_kwargs.resolution < 224),
-            backbone_kwargs=dnnlib.EasyDict(),
-        )
-        c.D_kwargs.backbone_kwargs.cout = 64
-        c.D_kwargs.backbone_kwargs.expand = True
-        c.D_kwargs.backbone_kwargs.proj_type = 2
-        c.D_kwargs.backbone_kwargs.patch = False
-        c.D_kwargs.backbone_kwargs.num_discs = 4
-        c.D_kwargs.backbone_kwargs.cond = opts.cond
-
         # Loss
-        c.loss_kwargs = dnnlib.EasyDict(class_name='training.loss.ProjectedGANLoss')
-        c.loss_kwargs.blur_init_sigma = 2  # Blur the images seen by the discriminator.
-        c.loss_kwargs.blur_fade_kimg = 300
         c.loss_kwargs.pl_weight = 0.0
         c.loss_kwargs.cls_weight = opts.cls_weight if opts.cond else 0
-        c.loss_kwargs.cls_model = 'deit_small_distilled_patch16_224'
         c.loss_kwargs.train_head_only = True
 
+    ##################################
+    ##################################
     ##################################
 
     # Launch.

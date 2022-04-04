@@ -492,6 +492,8 @@ class SynthesisNetwork(torch.nn.Module):
         self.first_cutoff = first_cutoff
         self.channel_max = channel_max
         self.num_layers = num_layers
+        self.conv_kernel = layer_kwargs['conv_kernel']
+        self.use_radial_filters = layer_kwargs['use_radial_filters']
 
         cutoffs, stopbands, sampling_rates, half_widths, sizes, channels = self.get_layer_specs()
         self.sampling_rates = sampling_rates
@@ -622,6 +624,8 @@ class SuperresGenerator(torch.nn.Module):
         self.last_stopband_rel = G_stem.synthesis.last_stopband_rel
         self.num_critical = G_stem.synthesis.num_critical
         self.num_fp16_res = G_stem.synthesis.num_fp16_res
+        self.conv_kernel = G_stem.synthesis.conv_kernel
+        self.use_radial_filters = G_stem.synthesis.use_radial_filters
 
         # cut off critically sampled layers
         for name in reversed(self.synthesis.layer_names):
@@ -658,7 +662,9 @@ class SuperresGenerator(torch.nn.Module):
                 in_size=int(fparams.sizes[prev]), out_size=int(fparams.sizes[idx]),
                 in_sampling_rate=int(fparams.sampling_rates[prev]), out_sampling_rate=int(fparams.sampling_rates[idx]),
                 in_cutoff=fparams.cutoffs[prev], out_cutoff=fparams.cutoffs[idx],
-                in_half_width=fparams.half_widths[prev], out_half_width=fparams.half_widths[idx])
+                in_half_width=fparams.half_widths[prev], out_half_width=fparams.half_widths[idx],
+                conv_kernel=self.conv_kernel, use_radial_filters=self.use_radial_filters,
+            )
             name = f'L{idx+stem_len}_{layer.out_size[0]}_{layer.out_channels}'
             setattr(self.synthesis, name, layer)
             self.synthesis.layer_names.append(name)

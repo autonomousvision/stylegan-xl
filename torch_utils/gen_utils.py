@@ -405,7 +405,7 @@ def z_to_img(G, latents: torch.Tensor, label: torch.Tensor, truncation_psi: floa
     return img
 
 
-def w_to_img(G, dlatents: Union[List[torch.Tensor], torch.Tensor], noise_mode: str = 'const') -> np.ndarray:
+def w_to_img(G, dlatents: Union[List[torch.Tensor], torch.Tensor], noise_mode: str = 'const', to_np: bool = True) -> np.ndarray:
     """
     Get an image/np.ndarray from a dlatent W using G and the selected noise_mode. The final shape of the
     returned image will be [len(dlatents), G.img_resolution, G.img_resolution, G.img_channels].
@@ -415,15 +415,27 @@ def w_to_img(G, dlatents: Union[List[torch.Tensor], torch.Tensor], noise_mode: s
         dlatents = dlatents.unsqueeze(0)  # An individual dlatent => [1, G.mapping.num_ws, G.mapping.w_dim]
     synth_image = G.synthesis(dlatents, noise_mode=noise_mode)
     synth_image = (synth_image + 1) * 255/2  # [-1.0, 1.0] -> [0.0, 255.0]
-    synth_image = synth_image.permute(0, 2, 3, 1).clamp(0, 255).to(torch.uint8).cpu().numpy()  # NCWH => NWHC
+    if to_np:
+        synth_image = synth_image.permute(0, 2, 3, 1).clamp(0, 255).to(torch.uint8).cpu().numpy()  # NCWH => NWHC
     return synth_image
 
 
-def get_w_from_seed(G, device: torch.device, seed: int, truncation_psi: float) -> torch.Tensor:
+def get_w_from_seed(G, device: torch.device, seed: int, truncation_psi: float, class_idx: Optional[int]) -> torch.Tensor:
     """Get the dlatent from a random seed, using the truncation trick (this could be optional)"""
+
+    label = torch.zeros([1, G.c_dim], device=device)
+    if G.c_dim != 0:
+        if class_idx is None:
+            raise click.ClickException('Must specify class label via --class when using a conditional network')
+        w_avg = G.mapping.w_avg[class_idx]
+        label[:, class_idx] = 1
+    else:
+        w_avg = G.mapping.w_avg
+        if class_idx is not None:
+            print('Warning: --class is ignored when running an unconditional network')
+
     z = np.random.RandomState(seed).randn(1, G.z_dim)
-    w = G.mapping(torch.from_numpy(z).to(device), None)
-    w_avg = G.mapping.w_avg
+    w = G.mapping(torch.from_numpy(z).to(device), label)
     w = w_avg + (w - w_avg) * truncation_psi
 
     return w
