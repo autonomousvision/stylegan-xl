@@ -119,8 +119,8 @@ python gen_samplesheet.py --outdir=sample_sheets --trunc=1.0 \
   --samples-per-class 4 --classes 0-32 --grid-width 32 \\
 ```
 
-For the ImageNet models, we enable multi-modal truncation (as proposed by [Self-Distilled
-GAN](https://self-distilled-stylegan.github.io/)). To switch from uni-model to multi-modal truncation, pass
+For the ImageNet models, we enable class-wise multi-modal truncation (a fast and class-conditional version of the truncation method by [Self-Distilled
+GAN](https://self-distilled-stylegan.github.io/)). We generate 60k class-conditional latents and find 30 cluster centroids via k-means. For a given samples, multi-modal truncation finds the closest centroids and interpolates towards it. To switch from uni-model to multi-modal truncation, pass
 
 <sub>`--centroids-path=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet_centroids.npy`</sub><br>
 
