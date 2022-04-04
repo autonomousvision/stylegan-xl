@@ -102,7 +102,7 @@ If you have enough compute, a good tactic is to train several stages in parallel
 
 To generate samples and interpolation videos, run
 ```
-python gen_images.py --outdir=out --trunc=0.7 --seeds=10-15 \
+python gen_images.py --outdir=out --trunc=0.7 --seeds=10-15 --batch-sz 1 \
   --network=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/pokemon256.pkl
 ```
 and
@@ -112,18 +112,15 @@ python gen_video.py --output=lerp.mp4 --trunc=0.7 --seeds=0-31 --grid=4x2 \
 ```
 For class-conditional models, you can pass the class index via ```--class```, a index-to-label dictionary for Imagenet can be found [here](https://github.com/xl-sr/stylegan_xl_release/blob/main/media/imagenet_idx2labels.txt).
 
-Generating large sample sheets:
+Generate a conditional sample sheets:
 ```
-# unconditional model
-python gen_samplesheet.py --outdir=sample_sheets --trunc=1.0 \
-  --network=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/pokemon256.pkl \
-  --samples-per-class 128
-
-# conditional model
 python gen_samplesheet.py --outdir=sample_sheets --trunc=1.0 \
   --network=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet128.pkl \
-  --max-classes 100 --samples-per-class 4 --classes-per-row 5
+  --samples-per-class 4 --classes 0-32 --grid-width 32 \\
 ```
+
+For the ImageNet models, we enable multi-modal truncation (as proposed by [self-distilled
+GAN](https://self-distilled-stylegan.github.io/)). To switch from uni- to multi-modal truncation, pass ``` centroids-path=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet_centroids.npy```.
 
 We provide the following pretrained models (pass the url as `PATH_TO_NETWORK_PKL`):
 
@@ -132,7 +129,7 @@ We provide the following pretrained models (pass the url as `PATH_TO_NETWORK_PKL
 ImageNet| 16<sup>2</sup>  |0.74|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet16.pkl`</sub><br>
 ImageNet| 32<sup>2</sup>  |1.11|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet32.pkl`</sub><br>
 ImageNet| 64<sup>2</sup>  |1.52|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet64.pkl`</sub><br>
-ImageNet| 128<sup>2</sup> |1.82|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet128.pkl`</sub><br>
+ImageNet| 128<sup>2</sup> |1.77|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet128.pkl`</sub><br>
 CIFAR10 | 32<sup>2</sup>  |1.85|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/cifar10.pkl`</sub><br>
 FFHQ    | 256<sup>2</sup> |2.19|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/ffhq256.pkl`</sub><br>
 Pokemon | 256<sup>2</sup> |23.97| <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/pokemon256.pkl`</sub><br>

@@ -19,6 +19,7 @@ import PIL.Image
 import torch
 
 import legacy
+from torch_utils import gen_utils
 
 #----------------------------------------------------------------------------
 
@@ -71,7 +72,9 @@ def make_transform(translate: Tuple[float,float], angle: float):
 @click.command()
 @click.option('--network', 'network_pkl', help='Network pickle filename', required=True)
 @click.option('--seeds', type=parse_range, help='List of random seeds (e.g., \'0,1,4-6\')', required=True)
+@click.option('--batch-sz', type=int, help='Batch size per sample', default=1)
 @click.option('--trunc', 'truncation_psi', type=float, help='Truncation psi', default=1, show_default=True)
+@click.option('--centroids-path', type=str, help='Pass path to precomputed centroids to enable multimodal truncation')
 @click.option('--class', 'class_idx', type=int, help='Class label (unconditional if not specified)')
 @click.option('--noise-mode', help='Noise mode', type=click.Choice(['const', 'random', 'none']), default='const', show_default=True)
 @click.option('--translate', help='Translate XY-coordinate (e.g. \'0.3,1\')', type=parse_vec2, default='0,0', show_default=True, metavar='VEC2')
@@ -80,49 +83,26 @@ def make_transform(translate: Tuple[float,float], angle: float):
 def generate_images(
     network_pkl: str,
     seeds: List[int],
+    batch_sz: int,
     truncation_psi: float,
+    centroids_path: str,
     noise_mode: str,
     outdir: str,
     translate: Tuple[float,float],
     rotate: float,
     class_idx: Optional[int]
 ):
-    """Generate images using pretrained network pickle.
-
-    Examples:
-
-    \b
-    # Generate an image using pre-trained AFHQv2 model ("Ours" in Figure 1, left).
-    python gen_images.py --outdir=out --trunc=1 --seeds=2 \\
-        --network=https://api.ngc.nvidia.com/v2/models/nvidia/research/stylegan3/versions/1/files/stylegan3-r-afhqv2-512x512.pkl
-
-    \b
-    # Generate uncurated images with truncation using the MetFaces-U dataset
-    python gen_images.py --outdir=out --trunc=0.7 --seeds=600-605 \\
-        --network=https://api.ngc.nvidia.com/v2/models/nvidia/research/stylegan3/versions/1/files/stylegan3-t-metfacesu-1024x1024.pkl
-    """
-
     print('Loading networks from "%s"...' % network_pkl)
     device = torch.device('cuda')
     with dnnlib.util.open_url(network_pkl) as f:
-        G = legacy.load_network_pkl(f)['G_ema'].to(device) # type: ignore
+        G = legacy.load_network_pkl(f)['G_ema']
+        G = G.eval().requires_grad_(False).to(device)
 
     os.makedirs(outdir, exist_ok=True)
-
-    # Labels.
-    label = torch.zeros([1, G.c_dim], device=device)
-    if G.c_dim != 0:
-        if class_idx is None:
-            raise click.ClickException('Must specify class label with --class when using a conditional network')
-        label[:, class_idx] = 1
-    else:
-        if class_idx is not None:
-            print ('warn: --class=lbl ignored when running on an unconditional network')
 
     # Generate images.
     for seed_idx, seed in enumerate(seeds):
         print('Generating image for seed %d (%d/%d) ...' % (seed, seed_idx, len(seeds)))
-        z = torch.from_numpy(np.random.RandomState(seed).randn(1, G.z_dim)).to(device)
 
         # Construct an inverse rotation/translation matrix and pass to the generator.  The
         # generator expects this matrix as an inverse to avoid potentially failing numerical
@@ -132,9 +112,10 @@ def generate_images(
             m = np.linalg.inv(m)
             G.synthesis.input.transform.copy_(torch.from_numpy(m))
 
-        img = G(z, label, truncation_psi=truncation_psi, noise_mode=noise_mode)
-        img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
-        PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/seed{seed:04d}.png')
+        w = gen_utils.get_w_from_seed(G, batch_sz, device, truncation_psi, seed=seed,
+                                      centroids_path=centroids_path, class_idx=class_idx)
+        img = gen_utils.w_to_img(G, w, to_np=True)
+        PIL.Image.fromarray(gen_utils.create_image_grid(img), 'RGB').save(f'{outdir}/seed{seed:04d}.png')
 
 
 #----------------------------------------------------------------------------

@@ -9,6 +9,8 @@ from locale import atof
 import click
 import numpy as np
 import torch
+import torch.nn.functional as F
+import dnnlib
 
 
 # ----------------------------------------------------------------------------
@@ -413,6 +415,7 @@ def w_to_img(G, dlatents: Union[List[torch.Tensor], torch.Tensor], noise_mode: s
     assert isinstance(dlatents, torch.Tensor), f'dlatents should be a torch.Tensor!: "{type(dlatents)}"'
     if len(dlatents.shape) == 2:
         dlatents = dlatents.unsqueeze(0)  # An individual dlatent => [1, G.mapping.num_ws, G.mapping.w_dim]
+
     synth_image = G.synthesis(dlatents, noise_mode=noise_mode)
     synth_image = (synth_image + 1) * 255/2  # [-1.0, 1.0] -> [0.0, 255.0]
     if to_np:
@@ -420,22 +423,44 @@ def w_to_img(G, dlatents: Union[List[torch.Tensor], torch.Tensor], noise_mode: s
     return synth_image
 
 
-def get_w_from_seed(G, device: torch.device, seed: int, truncation_psi: float, class_idx: Optional[int]) -> torch.Tensor:
-    """Get the dlatent from a random seed, using the truncation trick (this could be optional)"""
+def get_w_from_seed(G, batch_sz: int, device: torch.device, truncation_psi: float, seed: Optional[int], centroids_path: Optional[str], class_idx: Optional[int]) -> torch.Tensor:
+    """Get the dlatent from a list of random seeds, using the truncation trick (this could be optional)"""
 
-    label = torch.zeros([1, G.c_dim], device=device)
     if G.c_dim != 0:
+        # sample random labels if no class idx is given
         if class_idx is None:
-            raise click.ClickException('Must specify class label via --class when using a conditional network')
-        w_avg = G.mapping.w_avg[class_idx]
-        label[:, class_idx] = 1
+            class_indices = np.random.RandomState(seed).randint(low=0, high=G.c_dim, size=(batch_sz))
+            class_indices = torch.from_numpy(class_indices).to(device)
+            w_avg = G.mapping.w_avg.index_select(0, class_indices)
+        else:
+            w_avg = G.mapping.w_avg[class_idx].unsqueeze(0).repeat(batch_sz, 1)
+            class_indices = torch.full((batch_sz,), class_idx).to(device)
+
+        labels = F.one_hot(class_indices, G.c_dim)
+
     else:
-        w_avg = G.mapping.w_avg
+        w_avg = G.mapping.w_avg.unsqueeze(0)
+        labels = None
         if class_idx is not None:
             print('Warning: --class is ignored when running an unconditional network')
 
-    z = np.random.RandomState(seed).randn(1, G.z_dim)
-    w = G.mapping(torch.from_numpy(z).to(device), label)
+    z = np.random.RandomState(seed).randn(batch_sz, G.z_dim)
+    z = torch.from_numpy(z).to(device)
+    w = G.mapping(z, labels)
+
+    # multimodal truncation
+    if centroids_path is not None:
+
+        with dnnlib.util.open_url(centroids_path, verbose=False) as f:
+            w_centroids = np.load(f)
+        w_centroids = torch.from_numpy(w_centroids).to(device)
+        w_centroids = w_centroids[None].repeat(batch_sz, 1, 1)
+
+        # measure distances
+        dist = torch.norm(w_centroids - w[:, :1], dim=2, p=2)
+        w_avg = w_centroids[0].index_select(0, dist.argmin(1))
+
+    w_avg = w_avg.unsqueeze(1).repeat(1, G.mapping.num_ws, 1)
     w = w_avg + (w - w_avg) * truncation_psi
 
     return w
