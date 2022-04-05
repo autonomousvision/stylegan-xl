@@ -64,7 +64,7 @@ def subprocess_fn(rank, args, temp_dir):
             print(f'Calculating {metric}...')
         progress = metric_utils.ProgressMonitor(verbose=args.verbose)
         result_dict = metric_main.calc_metric(metric=metric, G=G, G_kwargs=args.G_kwargs, dataset_kwargs=args.dataset_kwargs,
-            num_gpus=args.num_gpus, rank=rank, device=device, progress=progress, snapshot_pkl=args.network_pkl)
+            num_gpus=args.num_gpus, rank=rank, device=device, progress=progress)
         if rank == 0:
             metric_main.report_metric(result_dict, run_dir=args.run_dir, snapshot_pkl=args.network_pkl)
         if rank == 0 and args.verbose:
@@ -94,8 +94,8 @@ def parse_comma_separated_list(s):
 @click.option('--gpus', help='Number of GPUs to use', type=int, default=1, metavar='INT', show_default=True)
 @click.option('--verbose', help='Print optional information', type=bool, default=True, metavar='BOOL', show_default=True)
 @click.option('--truncation', help='Truncation', type=float, default=1.0, show_default=True)
-
-def calc_metrics(ctx, network_pkl, metrics, data, mirror, gpus, verbose, truncation):
+@click.option('--centroids-path', type=str, help='Pass path to precomputed centroids to enable multimodal truncation')
+def calc_metrics(ctx, network_pkl, metrics, data, mirror, gpus, verbose, truncation, centroids_path):
     """Calculate quality metrics for previous training run or pretrained network pickle.
 
     Examples:
@@ -166,6 +166,7 @@ def calc_metrics(ctx, network_pkl, metrics, data, mirror, gpus, verbose, truncat
 
     # Additional options
     args.G_kwargs.truncation_psi = truncation
+    args.G_kwargs.centroids_path = centroids_path
 
     # Locate run dir.
     args.run_dir = None

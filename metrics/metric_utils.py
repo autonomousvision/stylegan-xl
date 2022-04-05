@@ -306,7 +306,6 @@ def compute_feature_stats_for_generator(opts, detector_url, detector_kwargs, rel
 
     # Setup generator and labels.
     G = copy.deepcopy(opts.G).eval().requires_grad_(False).to(opts.device)
-    c_iter = iterate_random_labels(opts=opts, batch_size=batch_gen)
 
     # Initialize.
     stats = FeatureStats(**stats_kwargs)
@@ -323,13 +322,16 @@ def compute_feature_stats_for_generator(opts, detector_url, detector_kwargs, rel
 
     # Main loop.
     if sfid:
-        h = detector.layers.mixed_6.conv.register_forward_hook(getActivation('mixed6_conv'))
+        detector.layers.mixed_6.conv.register_forward_hook(getActivation('mixed6_conv'))
 
+    from torch_utils import gen_utils
     while not stats.is_full():
         images = []
         for _i in range(batch_size // batch_gen):
-            z = torch.randn([batch_gen, G.z_dim], device=opts.device)
-            img = G(z=z, c=next(c_iter), **opts.G_kwargs)
+            w = gen_utils.get_w_from_seed(G, batch_gen, opts.device, truncation_psi=opts.G_kwargs.truncation_psi,
+                                          seed=None, centroids_path=opts.G_kwargs.centroids_path, class_idx=None)
+            img = G.synthesis(w)
+
             img = (img * 127.5 + 128).clamp(0, 255).to(torch.uint8)
             images.append(img)
         images = torch.cat(images)

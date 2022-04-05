@@ -134,13 +134,17 @@ We provide the following pretrained models (pass the url as `PATH_TO_NETWORK_PKL
 
 |Dataset| Res | FID | PATH
  :---  |  ---:  |  ---:  | :---
-ImageNet| 16<sup>2</sup>  |0.74|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet16.pkl`</sub><br>
+ImageNet| 16<sup>2</sup>  |0.73|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet16.pkl`</sub><br>
 ImageNet| 32<sup>2</sup>  |1.11|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet32.pkl`</sub><br>
 ImageNet| 64<sup>2</sup>  |1.52|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet64.pkl`</sub><br>
 ImageNet| 128<sup>2</sup> |1.77|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet128.pkl`</sub><br>
 CIFAR10 | 32<sup>2</sup>  |1.85|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/cifar10.pkl`</sub><br>
 FFHQ    | 256<sup>2</sup> |2.19|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/ffhq256.pkl`</sub><br>
 Pokemon | 256<sup>2</sup> |23.97| <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/pokemon256.pkl`</sub><br>
+
+The weights for the ImageNet models at 64<sup>2</sup> and higher are currently still getting updated. If you cannot reproduce the reported FID via ```calc_metrics.py``` (see below) you are likely using an older cached network pkl. Delete the previous model weights in your cache folder at ```$HOME/.cache/downloads/```.
+
+Last update on **05.04.2022**.
 
 ## Quality Metrics ##
 Per default, ```train.py``` tracks FID50k during training. To calculate metrics for a specific network snapshot, run
