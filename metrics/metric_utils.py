@@ -28,6 +28,7 @@ import contextlib
 from pg_modules.projector import F_RandomProj
 from pathlib import Path
 import dill
+from torch_utils import gen_utils
 
 #----------------------------------------------------------------------------
 
@@ -265,7 +266,7 @@ def compute_feature_stats_for_dataset(opts, detector_url, detector_kwargs, rel_l
 
     # Main loop.
     if sfid:
-        h = detector.layers.mixed_6.conv.register_forward_hook(getActivation('mixed6_conv'))
+        detector.layers.mixed_6.conv.register_forward_hook(getActivation('mixed6_conv'))
 
     item_subset = [(i * opts.num_gpus + opts.rank) % num_items for i in range((num_items - 1) // opts.num_gpus + 1)]
     if shuffle_size is not None:
@@ -324,7 +325,6 @@ def compute_feature_stats_for_generator(opts, detector_url, detector_kwargs, rel
     if sfid:
         detector.layers.mixed_6.conv.register_forward_hook(getActivation('mixed6_conv'))
 
-    from torch_utils import gen_utils
     while not stats.is_full():
         images = []
         for _i in range(batch_size // batch_gen):

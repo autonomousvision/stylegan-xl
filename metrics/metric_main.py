@@ -166,8 +166,14 @@ def kid50k(opts):
 @register_metric
 def pr50k3(opts):
     opts.dataset_kwargs.update(max_size=None)
-    precision, recall = precision_recall.compute_pr(opts, max_real=6250, num_gen=50000, nhood_size=3, row_batch_size=10000, col_batch_size=10000)
+    precision, recall = precision_recall.compute_pr(opts, max_real=50000, num_gen=50000, nhood_size=3, row_batch_size=10000, col_batch_size=10000)
     return dict(pr50k3_precision=precision, pr50k3_recall=recall)
+
+@register_metric
+def pr10k3(opts):
+    opts.dataset_kwargs.update(max_size=None)
+    precision, recall = precision_recall.compute_pr(opts, max_real=10000, num_gen=10000, nhood_size=3, row_batch_size=10000, col_batch_size=10000)
+    return dict(pr10k3_precision=precision, pr10k3_recall=recall)
 
 @register_metric
 def is50k(opts):
