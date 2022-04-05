@@ -142,7 +142,7 @@ CIFAR10 | 32<sup>2</sup>  |1.85|  <sub>`https://s3.eu-central-1.amazonaws.com/av
 FFHQ    | 256<sup>2</sup> |2.19|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/ffhq256.pkl`</sub><br>
 Pokemon | 256<sup>2</sup> |23.97| <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/pokemon256.pkl`</sub><br>
 
-The weights for the ImageNet models at 64<sup>2</sup> and higher are currently still getting updated. If you cannot reproduce the reported FID via ```calc_metrics.py``` (see below) you are likely using an older cached network pkl. Delete the previous model weights in your cache folder at ```$HOME/.cache/downloads/```.
+The weights for the ImageNet models at 64<sup>2</sup> and higher are currently still getting updated. If you cannot reproduce the reported FID via ```calc_metrics.py``` (see below) you are likely using an older cached network pkl. Delete the previous model weights in your cache folder at ```$HOME/.cache/dnnlib/downloads/```.
 
 Last update on **05.04.2022**.
 
