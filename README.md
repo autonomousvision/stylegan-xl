@@ -30,7 +30,8 @@ If you find our code or paper useful, please cite
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-imagenet-512x512)](https://paperswithcode.com/sota/image-generation-on-imagenet-512x512?p=stylegan-xl-scaling-stylegan-to-large-diverse)|
 
 ## Related Projects ##
-- [Projected GANs Converge Faster](https://github.com/autonomousvision/projected_gan)
+- [Projected GANs Converge Faster](https://github.com/autonomousvision/projected_gan) - [![Projected GAN Quickstart](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/gist/xl-sr/757757ff8709ad1721c6d9462efdc347/projected_gan.ipynb)
+- [StyleGAN-XL + CLIP](https://github.com/CasualGANPapers/StyleGANXL-CLIP) - [![StyleGAN-XL + CLIP](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/CasualGANPapers/unconditional-StyleGANXL-CLIP/blob/main/StyleganXL%2BCLIP.ipynb)
 
 ## ToDos
 - [x] Initial code release
@@ -92,7 +93,7 @@ python train.py --outdir=./training-runs/pokemon --cfg=stylegan3-t --data=./data
 
 ```--up_factor``` allows to train several stages at once, i.e., with ```--up_factor=4``` and a 16<sup>2</sup> stem you can directly train at resolution  64<sup>2</sup>.
 
-For unimodal datasets, we recommend using fewer layers, e.g., ``--head_layers 4```.
+For unimodal datasets, we recommend using fewer layers, e.g., ```--head_layers 4```.
 
 If you have enough compute, a good tactic is to train several stages in parallel and then restart the superresolution stage training once in a while. The current stage will then reload its previous stem's ```best_model.pkl```. Performance can sometimes drop at first because of domain shift, but the superresolution stage quickly recovers and improves further.
 
