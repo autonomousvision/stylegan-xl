@@ -85,7 +85,7 @@ For a class-conditional dataset (ImageNet, CIFAR-10), add the flag ```--cond Tru
 #### Training the super-resolution stages
 Continuing with pretrained stem:
 ```
-python train.py --outdir=./training-runs/pokemon --cfg=stylegan3-t --data=./data/pokemon32.zip
+python train.py --outdir=./training-runs/pokemon --cfg=stylegan3-t --data=./data/pokemon32.zip \
   --gpus=8 --batch=64 --mirror=1 --snap 10 --batch-gpu 8 --kimg 10000 --syn_layers 10 \
   --superres --up_factor 2 --head_layers 7 \
   --path_stem training-runs/pokemon/00000-stylegan3-t-pokemon16-gpus8-batch64/best_model.pkl
