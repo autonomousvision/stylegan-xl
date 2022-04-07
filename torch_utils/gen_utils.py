@@ -423,7 +423,7 @@ def w_to_img(G, dlatents: Union[List[torch.Tensor], torch.Tensor], noise_mode: s
     return synth_image
 
 
-def get_w_from_seed(G, batch_sz: int, device: torch.device, truncation_psi: float, seed: Optional[int], centroids_path: Optional[str], class_idx: Optional[int]) -> torch.Tensor:
+def get_w_from_seed(G, batch_sz, device, truncation_psi=1.0, seed=None, centroids_path=None, class_idx=None):
     """Get the dlatent from a list of random seeds, using the truncation trick (this could be optional)"""
 
     if G.c_dim != 0:

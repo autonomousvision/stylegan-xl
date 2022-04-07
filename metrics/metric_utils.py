@@ -328,8 +328,7 @@ def compute_feature_stats_for_generator(opts, detector_url, detector_kwargs, rel
     while not stats.is_full():
         images = []
         for _i in range(batch_size // batch_gen):
-            w = gen_utils.get_w_from_seed(G, batch_gen, opts.device, truncation_psi=opts.G_kwargs.truncation_psi,
-                                          seed=None, centroids_path=opts.G_kwargs.centroids_path, class_idx=None)
+            w = gen_utils.get_w_from_seed(G, batch_gen, opts.device, **opts.G_kwargs)
             img = G.synthesis(w)
 
             img = (img * 127.5 + 128).clamp(0, 255).to(torch.uint8)
