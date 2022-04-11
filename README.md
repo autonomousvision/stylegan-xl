@@ -35,12 +35,12 @@ If you find our code or paper useful, please cite
 
 ## ToDos
 - [x] Initial code release
-- [x] Add pretrained models (ImageNet{16,32,64,128}, FFHQ256, Pokemon256)
-- [ ] Add higher resolution models (ImageNet{256,512,1024})
+- [x] Add pretrained models (ImageNet{16,32,64,128,256}, FFHQ256, Pokemon256)
+- [ ] Add higher resolution models (ImageNet{512,1024}, FFHQ{512,1024})
 - [ ] Add PTI for inversion
 - [ ] Add StyleMC for editing
 
-The higher resolution models are currently retraining with improved settings, weights will be gradually rolled out. Expected release of the ImageNet256 model is **14.04.2022**.
+The higher resolution models are currently retraining with improved settings, weights will be gradually rolled out. Expected release of the ImageNet256 model is **21.04.2022**.
 
 ## Requirements ##
 - 64-bit Python 3.8 and PyTorch 1.9.0 (or later). See https://pytorch.org for PyTorch install instructions.
@@ -98,7 +98,11 @@ If you have enough compute, a good tactic is to train several stages in parallel
 #### Training recommendations for datasets other than ImageNet
 The default settings are tuned for ImageNet. For smaller datasets (<50k images) or well-curated datasets (FFHQ), you can significantly decrease the model size enabling much faster training. Recommended settings are: ```--cbase 128 --cmax 128 --syn_layers 4``` and for superresolution stages ```--head_layers 4```. 
 
-Suppose you want to train as few stages as possible. We recommend training a 32x32 or 64x64 stem, then directly scaling to the final resolution (as described above, you must adjust ```--up_factor``` accordingly). 
+Suppose you want to train as few stages as possible. We recommend training a 32x32 or 64x64 stem, then directly scaling to the final resolution (as described above, you must adjust ```--up_factor``` accordingly). However, generally, progressive growing yields better results faster as the throughput is much higher at lower resolutions. This can be seen in this figure by [Karras et al., 2017](https://arxiv.org/abs/1710.10196):
+
+<p align="center">
+  <img width="400" src="https://user-images.githubusercontent.com/29833625/162812365-1a718ec1-13f5-4944-b6c5-f63020c817a6.png">
+</p>
 
 
 ## Generating Samples & Interpolations ##
@@ -142,13 +146,14 @@ ImageNet| 16<sup>2</sup>  |0.73|  <sub>`https://s3.eu-central-1.amazonaws.com/av
 ImageNet| 32<sup>2</sup>  |1.11|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet32.pkl`</sub><br>
 ImageNet| 64<sup>2</sup>  |1.52|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet64.pkl`</sub><br>
 ImageNet| 128<sup>2</sup> |1.77|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet128.pkl`</sub><br>
+ImageNet| 256<sup>2</sup> |2.26|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet256.pkl`</sub><br>
 CIFAR10 | 32<sup>2</sup>  |1.85|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/cifar10.pkl`</sub><br>
 FFHQ    | 256<sup>2</sup> |2.19|  <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/ffhq256.pkl`</sub><br>
 Pokemon | 256<sup>2</sup> |23.97| <sub>`https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/pokemon256.pkl`</sub><br>
 
 The weights for the ImageNet models at 64<sup>2</sup> and higher are currently still getting updated. If you cannot reproduce the reported FID via ```calc_metrics.py``` (see below) you are likely using an older cached network pkl. Delete the previous model weights in your cache folder at ```$HOME/.cache/dnnlib/downloads/```.
 
-Last update on **05.04.2022**.
+Last update on **11.04.2022**.
 
 ## Quality Metrics ##
 Per default, ```train.py``` tracks FID50k during training. To calculate metrics for a specific network snapshot, run
