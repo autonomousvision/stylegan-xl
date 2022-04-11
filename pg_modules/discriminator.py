@@ -8,6 +8,7 @@ from training.diffaug import DiffAugment
 from training.networks_stylegan2 import FullyConnectedLayer
 from pg_modules.blocks import conv2d, DownBlock, DownBlockPatch
 from pg_modules.projector import F_RandomProj
+from feature_networks.constants import VITS
 
 class SingleDisc(nn.Module):
     def __init__(self, nc=None, ndf=None, start_sz=256, end_sz=8, head=None, patch=False):
@@ -197,7 +198,7 @@ class ProjectedDiscriminator(torch.nn.Module):
         for bb_name, feat in self.feature_networks.items():
             x_aug = DiffAugment(x, policy='color,translation,cutout') if self.diffaug else x
 
-            if self.interp224:
+            if self.interp224 or bb_name in VITS:
                 x_aug = F.interpolate(x_aug, 224, mode='bilinear', align_corners=False)
 
             features = feat(x_aug)
