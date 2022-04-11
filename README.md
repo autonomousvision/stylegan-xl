@@ -85,7 +85,7 @@ For a class-conditional dataset (ImageNet, CIFAR-10), add the flag ```--cond Tru
 #### Training the super-resolution stages
 Continuing with pretrained stem:
 ```
-python train.py --outdir=./training-runs/pokemon --cfg=stylegan3-t --data=./data/pokemon32.zip
+python train.py --outdir=./training-runs/pokemon --cfg=stylegan3-t --data=./data/pokemon32.zip \
   --gpus=8 --batch=64 --mirror=1 --snap 10 --batch-gpu 8 --kimg 10000 --syn_layers 10 \
   --superres --up_factor 2 --head_layers 7 \
   --path_stem training-runs/pokemon/00000-stylegan3-t-pokemon16-gpus8-batch64/best_model.pkl
@@ -93,9 +93,12 @@ python train.py --outdir=./training-runs/pokemon --cfg=stylegan3-t --data=./data
 
 ```--up_factor``` allows to train several stages at once, i.e., with ```--up_factor=4``` and a 16<sup>2</sup> stem you can directly train at resolution  64<sup>2</sup>.
 
-For unimodal datasets, we recommend using fewer layers, e.g., ```--head_layers 4```.
-
 If you have enough compute, a good tactic is to train several stages in parallel and then restart the superresolution stage training once in a while. The current stage will then reload its previous stem's ```best_model.pkl```. Performance can sometimes drop at first because of domain shift, but the superresolution stage quickly recovers and improves further.
+
+#### Training recommendations for datasets other than ImageNet
+The default settings are tuned for ImageNet. For smaller datasets (<50k images) or well-curated datasets (FFHQ), you can significantly decrease the model size enabling much faster training. Recommended settings are: ```--cbase 128 --cmax 128 --syn_layers 4``` and for superresolution stages ```--head_layers 4```. 
+
+Suppose you want to train as few stages as possible. We recommend training a 32x32 or 64x64 stem, then directly scaling to the final resolution (as described above, you must adjust ```--up_factor``` accordingly). 
 
 
 ## Generating Samples & Interpolations ##
@@ -117,11 +120,11 @@ To generate a conditional sample sheet, run
 ```
 python gen_samplesheet.py --outdir=sample_sheets --trunc=1.0 \
   --network=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet128.pkl \
-  --samples-per-class 4 --classes 0-32 --grid-width 32 \\
+  --samples-per-class 4 --classes 0-32 --grid-width 32 
 ```
 
-For the ImageNet models, we enable class-wise multi-modal truncation (a fast and class-conditional version of the truncation method by [Self-Distilled
-GAN](https://self-distilled-stylegan.github.io/)). We generate 60k class-conditional latents and find 30 cluster centroids via k-means. For a given samples, multi-modal truncation finds the closest centroids and interpolates towards it. To switch from uni-model to multi-modal truncation, pass
+For ImageNet models, we enable multi-modal truncation (proposed by [Self-Distilled
+GAN](https://self-distilled-stylegan.github.io/)). We generated 600k find 10k cluster centroids via k-means. For a given samples, multi-modal truncation finds the closest centroids and interpolates towards it. To switch from uni-model to multi-modal truncation, pass
 
 <sub>`--centroids-path=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet_centroids.npy`</sub><br>
 
