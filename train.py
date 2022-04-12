@@ -233,8 +233,13 @@ def main(**kwargs):
         c.G_kwargs.magnitude_ema_beta = 0.5 ** (c.batch_size / (20 * 1e3))
         c.G_kwargs.channel_base *= 2  # increase for StyleGAN-XL
         c.G_kwargs.channel_max *= 2   # increase for StyleGAN-XL
-        c.G_kwargs.conv_kernel = 1 if opts.cfg == 'stylegan3-r' else 3
-        c.G_kwargs.use_radial_filters = True if opts.cfg == 'stylegan3-r' else False
+        
+        if opts.cfg == 'stylegan3-r:
+            c.G_kwargs.use_radial_filters = True
+            c.G_kwargs.conv_kernel = 1 
+            c.G_kwargs.channel_base *= 2
+            c.G_kwargs.channel_max *= 2
+            
 
     # Resume.
     if opts.resume is not None:
