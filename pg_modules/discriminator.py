@@ -177,7 +177,6 @@ class ProjectedDiscriminator(torch.nn.Module):
                 **backbone_kwargs,
             )
 
-            bb_name += f"_{i}"
             feature_networks.append([bb_name, feat])
             discriminators.append([bb_name, disc])
 
