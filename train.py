@@ -234,7 +234,7 @@ def main(**kwargs):
         c.G_kwargs.channel_base *= 2  # increase for StyleGAN-XL
         c.G_kwargs.channel_max *= 2   # increase for StyleGAN-XL
         
-        if opts.cfg == 'stylegan3-r:
+        if opts.cfg == 'stylegan3-r':
             c.G_kwargs.use_radial_filters = True
             c.G_kwargs.conv_kernel = 1 
             c.G_kwargs.channel_base *= 2
