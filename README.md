@@ -36,9 +36,9 @@ If you find our code or paper useful, please cite
 ## ToDos
 - [x] Initial code release
 - [x] Add pretrained models (ImageNet{16,32,64,128,256,512}, FFHQ{256,512,1024}, Pokemon256)
-- [x] Add PTI for inversion
+- [x] Add StyleMC for editing
+- [ ] Add PTI for inversion
 - [ ] Add higher resolution models (ImageNet1024, Pokemon{512,1024})
-- [ ] Add StyleMC for editing
 
 Expected release of the ImageNet1024 model: **01.05.2022**.
 
@@ -138,9 +138,15 @@ GAN](https://self-distilled-stylegan.github.io/)). We generated 600k find 10k cl
 
 ## Image Editing ##
 <img src="media/editing_banner.png">
+
 To use our reimplementation of [StyleMC](https://arxiv.org/abs/2112.08493), run
+
 ```
-python run_stylemc.py --outdir=stylemc_out --network=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet128.pkl --text-prompt "a chimpanzee | laughter | happyness| happy chimpanzee | happy monkey | smile | grin" --seeds 0-256 --class-idx 367 --layers 10-30 --edit-strength 0.75 --init-seed 49 --bigger-network https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet1024.pkl
+python run_stylemc.py --outdir=stylemc_out \
+  --network=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet128.pkl \
+  --text-prompt "a chimpanzee | laughter | happyness| happy chimpanzee | happy monkey | smile | grin" \
+  --seeds 0-256 --class-idx 367 --layers 10-30 --edit-strength 0.75 --init-seed 49 \
+  --bigger-network https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet1024.pkl
 ```
 
 Suggested workflow:
