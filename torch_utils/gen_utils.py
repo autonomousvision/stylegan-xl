@@ -466,15 +466,15 @@ def get_w_from_seed(G, batch_sz, device, truncation_psi=1.0, seed=None, centroid
     return w
 
 
-def get_w_from_file(file: Union[str, os.PathLike], return_ext: bool = False) -> Tuple[np.ndarray, Optional[str]]:
-    """Get dlatent (w) from a .npy or .npz file"""
+def get_w_from_file(file, device='cuda', return_ext=False):
     filename, file_extension = os.path.splitext(file)
     assert file_extension in ['.npy', '.npz'], f'"{file}" has wrong file format! Use either ".npy" or ".npz"'
+
     if file_extension == '.npy':
         r = (np.load(file), '.npy') if return_ext else np.load(file)
-        return r
-    r = (np.load(file)['w'], '.npz') if return_ext else np.load(file)['w']
-    return r
+    else:
+        r = (np.load(file)['w'], '.npz') if return_ext else np.load(file)['w']
+    return torch.from_numpy(r).to(device)
 
 
 # ----------------------------------------------------------------------------

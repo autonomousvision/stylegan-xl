@@ -22,7 +22,7 @@ If you find our code or paper useful, please cite
 ```
 
 |Rank on Papers With Code|  &nbsp;
- :---  |  :---  
+ :---  |  :---
  [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-imagenet-32x32)](https://paperswithcode.com/sota/image-generation-on-imagenet-32x32?p=stylegan-xl-scaling-stylegan-to-large-diverse)|[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-cifar-10)](https://paperswithcode.com/sota/image-generation-on-cifar-10?p=stylegan-xl-scaling-stylegan-to-large-diverse)
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-imagenet-64x64)](https://paperswithcode.com/sota/image-generation-on-imagenet-64x64?p=stylegan-xl-scaling-stylegan-to-large-diverse)|[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-ffhq-256-x-256)](https://paperswithcode.com/sota/image-generation-on-ffhq-256-x-256?p=stylegan-xl-scaling-stylegan-to-large-diverse)
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-imagenet-128x128)](https://paperswithcode.com/sota/image-generation-on-imagenet-128x128?p=stylegan-xl-scaling-stylegan-to-large-diverse)|[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/stylegan-xl-scaling-stylegan-to-large-diverse/image-generation-on-ffhq)](https://paperswithcode.com/sota/image-generation-on-ffhq?p=stylegan-xl-scaling-stylegan-to-large-diverse)
@@ -36,8 +36,8 @@ If you find our code or paper useful, please cite
 ## ToDos
 - [x] Initial code release
 - [x] Add pretrained models (ImageNet{16,32,64,128,256,512}, FFHQ{256,512,1024}, Pokemon256)
+- [x] Add PTI for inversion
 - [ ] Add higher resolution models (ImageNet1024, Pokemon{512,1024})
-- [ ] Add PTI for inversion
 - [ ] Add StyleMC for editing
 
 Expected release of the ImageNet1024 model: **01.05.2022**.
@@ -96,7 +96,7 @@ python train.py --outdir=./training-runs/pokemon --cfg=stylegan3-t --data=./data
 If you have enough compute, a good tactic is to train several stages in parallel and then restart the superresolution stage training once in a while. The current stage will then reload its previous stem's ```best_model.pkl```. Performance can sometimes drop at first because of domain shift, but the superresolution stage quickly recovers and improves further.
 
 #### Training recommendations for datasets other than ImageNet
-The default settings are tuned for ImageNet. For smaller datasets (<50k images) or well-curated datasets (FFHQ), you can significantly decrease the model size enabling much faster training. Recommended settings are: ```--cbase 128 --cmax 128 --syn_layers 4``` and for superresolution stages ```--head_layers 4```. 
+The default settings are tuned for ImageNet. For smaller datasets (<50k images) or well-curated datasets (FFHQ), you can significantly decrease the model size enabling much faster training. Recommended settings are: ```--cbase 128 --cmax 128 --syn_layers 4``` and for superresolution stages ```--head_layers 4```.
 
 Suppose you want to train as few stages as possible. We recommend training a 32x32 or 64x64 stem, then directly scaling to the final resolution (as described above, you must adjust ```--up_factor``` accordingly). However, generally, progressive growing yields better results faster as the throughput is much higher at lower resolutions. This can be seen in this figure by [Karras et al., 2017](https://arxiv.org/abs/1710.10196):
 
@@ -124,7 +124,7 @@ To generate a conditional sample sheet, run
 ```
 python gen_samplesheet.py --outdir=sample_sheets --trunc=1.0 \
   --network=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet128.pkl \
-  --samples-per-class 4 --classes 0-32 --grid-width 32 
+  --samples-per-class 4 --classes 0-32 --grid-width 32
 ```
 
 For ImageNet models, we enable multi-modal truncation (proposed by [Self-Distilled
@@ -134,8 +134,23 @@ GAN](https://self-distilled-stylegan.github.io/)). We generated 600k find 10k cl
 
 |No Truncation| Uni-Modal Truncation | Multi-Modal Truncation
 :---  |  :---:  |  :---:
-<img src="media/no_truncation.png"> | <img src="media/unimodal_truncation.png">| <img src="media/multimodal_truncation.png"> 
- 
+<img src="media/no_truncation.png"> | <img src="media/unimodal_truncation.png">| <img src="media/multimodal_truncation.png">
+
+## Image Editing ##
+<img src="media/editing_banner.png">
+To use our reimplementation of [StyleMC](https://arxiv.org/abs/2112.08493), run
+```
+python run_stylemc.py --outdir=stylemc_out --network=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet128.pkl --text-prompt "a chimpanzee | laughter | happyness| happy chimpanzee | happy monkey | smile | grin" --seeds 0-256 --class-idx 367 --layers 10-30 --edit-strength 0.75 --init-seed 49 --bigger-network https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet1024.pkl
+```
+
+Suggested workflow:
+
+- Sample images via ```gen_images.py```.
+- Pick a sample and use it as inital image for ```stylemc.py``` by providing ```--init-seed``` and ```class-idx```.
+- Find a corresponding direction in style space via ```--text-prompt```.
+- Finetune ```--edit-strength```, ```--layers```, and amount of ```--seeds```.
+- Once you found a good setting, provide a larger model via ```--bigger-network```. The script still optimizes the direction for the smaller model, but uses the bigger model for the final output.
+
 ## Pretrained Models ##
 
 We provide the following pretrained models (pass the url as `PATH_TO_NETWORK_PKL`):
