@@ -139,21 +139,21 @@ GAN](https://self-distilled-stylegan.github.io/)). We generated 600k find 10k cl
 ## Image Editing ##
 <img src="media/editing_banner.png">
 
-To use our reimplementation of [StyleMC](https://arxiv.org/abs/2112.08493), run
+To use our reimplementation of [StyleMC](https://arxiv.org/abs/2112.08493), and generate the example above, run
 
 ```
 python run_stylemc.py --outdir=stylemc_out \
-  --network=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet128.pkl \
   --text-prompt "a chimpanzee | laughter | happyness| happy chimpanzee | happy monkey | smile | grin" \
   --seeds 0-256 --class-idx 367 --layers 10-30 --edit-strength 0.75 --init-seed 49 \
+  --network=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet128.pkl \
   --bigger-network https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet1024.pkl
 ```
 
-Suggested workflow:
+Recommended workflow:
 
 - Sample images via ```gen_images.py```.
-- Pick a sample and use it as inital image for ```stylemc.py``` by providing ```--init-seed``` and ```class-idx```.
-- Find a corresponding direction in style space via ```--text-prompt```.
+- Pick a sample and use it as the inital image for ```stylemc.py``` by providing ```--init-seed``` and ```--class-idx```.
+- Find a direction in style space via ```--text-prompt```.
 - Finetune ```--edit-strength```, ```--layers```, and amount of ```--seeds```.
 - Once you found a good setting, provide a larger model via ```--bigger-network```. The script still optimizes the direction for the smaller model, but uses the bigger model for the final output.
 
