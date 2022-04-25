@@ -23,7 +23,7 @@ import legacy
 
 from pg_modules.blocks import Interpolate
 import timm
-from pg_modules.projector import norm_with_stats, get_backbone_normstats
+from pg_modules.projector import get_backbone_normstats
 
 #----------------------------------------------------------------------------
 
@@ -57,7 +57,8 @@ class ProjectedGANLoss(Loss):
         # classifier guidance
         cls = timm.create_model(cls_model, pretrained=True).eval()
         self.classifier = nn.Sequential(Interpolate(224), cls).to(device)
-        self.normstats = get_backbone_normstats(cls_model)
+        normstats = get_backbone_normstats(cls_model)
+        self.norm = Normalize(normstats['mean'], normstats['std'])
         self.cls_weight = cls_weight
         self.cls_guidance_loss = torch.nn.CrossEntropyLoss()
 
@@ -106,9 +107,7 @@ class ProjectedGANLoss(Loss):
                 gen_logits = torch.cat(gen_logits)
 
                 if self.cls_weight:
-                    if self.normstats is not None:
-                        gen_img = norm_with_stats(gen_img, self.normstats)
-
+                    gen_img = self.norm(gen_img.add(1).div(2)) 
                     guidance_loss = self.cls_guidance_loss(self.classifier(gen_img), gen_c.argmax(1))
                     loss_Gmain += self.cls_weight * guidance_loss
                     training_stats.report('Loss/G/guidance_loss', guidance_loss)

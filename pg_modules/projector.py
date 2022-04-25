@@ -1,21 +1,18 @@
 import torch
 import torch.nn as nn
+from torchvision.transforms import Normalize
 
 from feature_networks.vit import forward_vit
 from feature_networks.pretrained_builder import _make_pretrained
 from feature_networks.constants import NORMALIZED_INCEPTION, NORMALIZED_IMAGENET, NORMALIZED_CLIP, VITS
 from pg_modules.blocks import FeatureFusionBlock
 
-def norm_with_stats(x, stats):
-    x_ch0 = torch.unsqueeze(x[:, 0], 1) * (0.5 / stats['mean'][0]) + (0.5 - stats['std'][0]) / stats['mean'][0]
-    x_ch1 = torch.unsqueeze(x[:, 1], 1) * (0.5 / stats['mean'][1]) + (0.5 - stats['std'][1]) / stats['mean'][1]
-    x_ch2 = torch.unsqueeze(x[:, 2], 1) * (0.5 / stats['mean'][2]) + (0.5 - stats['std'][2]) / stats['mean'][2]
-    x = torch.cat((x_ch0, x_ch1, x_ch2), 1)
-    return x
-
 def get_backbone_normstats(backbone):
     if backbone in NORMALIZED_INCEPTION:
-        return None
+        return {
+            'mean': [0.5, 0.5, 0.5],
+            'std': [0.5, 0.5, 0.5],
+        }
 
     elif backbone in NORMALIZED_IMAGENET:
         return {
@@ -104,9 +101,8 @@ class F_RandomProj(nn.Module):
         self.backbone = backbone
         self.cout = cout
         self.expand = expand
-
-        # values for normalize_type: 0 (none), 1 (IN stats), 2 (clip stats)
         self.normstats = get_backbone_normstats(backbone)
+        self.norm = Normalize(self.normstats['mean'], self.normstats['std'])
 
         # build pretrained feature network and random decoder (scratch)
         self.pretrained, self.scratch = _make_projector(im_res=im_res, backbone=self.backbone, cout=self.cout,
@@ -115,10 +111,8 @@ class F_RandomProj(nn.Module):
         self.RESOLUTIONS = self.pretrained.RESOLUTIONS
 
     def forward(self, x):
-
         # norm according to used backbone
-        if self.normstats is not None:
-            x = norm_with_stats(x, self.normstats)
+        x = self.norm(x.add(1).div(2))
 
         # predict feature maps
         if self.backbone in VITS:
