@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-from torchvision.transforms import Normalize
 
 from feature_networks.vit import forward_vit
 from feature_networks.pretrained_builder import _make_pretrained
@@ -102,7 +101,6 @@ class F_RandomProj(nn.Module):
         self.cout = cout
         self.expand = expand
         self.normstats = get_backbone_normstats(backbone)
-        self.norm = Normalize(self.normstats['mean'], self.normstats['std'])
 
         # build pretrained feature network and random decoder (scratch)
         self.pretrained, self.scratch = _make_projector(im_res=im_res, backbone=self.backbone, cout=self.cout,
@@ -111,9 +109,6 @@ class F_RandomProj(nn.Module):
         self.RESOLUTIONS = self.pretrained.RESOLUTIONS
 
     def forward(self, x):
-        # norm according to used backbone
-        x = self.norm(x.add(1).div(2))
-
         # predict feature maps
         if self.backbone in VITS:
             out0, out1, out2, out3 = forward_vit(self.pretrained, x)

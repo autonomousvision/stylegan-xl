@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torchvision.transforms import Normalize
 import pickle
 
 from training.diffaug import DiffAugment
@@ -192,14 +193,21 @@ class ProjectedDiscriminator(torch.nn.Module):
         return self.train(False)
 
     def forward(self, x, c):
+        # unnormalize
+        x = x.add(1).div(2)
+
         logits = []
-
         for bb_name, feat in self.feature_networks.items():
-            x_aug = DiffAugment(x, policy='color,translation,cutout') if self.diffaug else x
 
+            # normalize and augment
+            x_n = Normalize(feat.normstats['mean'], feat.normstats['std'])(x)
+            x_aug = DiffAugment(x_n, policy='color,translation,cutout') if self.diffaug else x_n
+
+            # interpolate if necessary
             if self.interp224 or bb_name in VITS:
                 x_aug = F.interpolate(x_aug, 224, mode='bilinear', align_corners=False)
 
+            # forward pass
             features = feat(x_aug)
             l = self.discriminators[bb_name](features, c)
             logits += l
