@@ -193,23 +193,25 @@ class ProjectedDiscriminator(torch.nn.Module):
         return self.train(False)
 
     def forward(self, x, c):
-        # unnormalize
-        x = x.add(1).div(2)
-
         logits = []
+
         for bb_name, feat in self.feature_networks.items():
 
-            # normalize and augment
-            x_n = Normalize(feat.normstats['mean'], feat.normstats['std'])(x)
-            x_aug = DiffAugment(x_n, policy='color,translation,cutout') if self.diffaug else x_n
+            # apply augmentation (x in [-1, 1])
+            x_aug = DiffAugment(x, policy='color,translation,cutout') if self.diffaug else x
 
-            # interpolate if necessary
+            # transform to [0,1]
+            x_aug = x_aug.add(1).div(2)
+
+            # apply F-specific normalization
+            x_n = Normalize(feat.normstats['mean'], feat.normstats['std'])(x_aug)
+
+            # upsample if smaller, downsample if larger + VIT
             if self.interp224 or bb_name in VITS:
-                x_aug = F.interpolate(x_aug, 224, mode='bilinear', align_corners=False)
+                x_n = F.interpolate(x_n, 224, mode='bilinear', align_corners=False)
 
             # forward pass
-            features = feat(x_aug)
-            l = self.discriminators[bb_name](features, c)
-            logits += l
+            features = feat(x_n)
+            logits += self.discriminators[bb_name](features, c)
 
         return logits
