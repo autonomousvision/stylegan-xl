@@ -1,3 +1,5 @@
+# Code from: https://github.com/PDillis/stylegan3-fun
+
 import os
 import re
 import json
