@@ -148,7 +148,7 @@ def generate_edit(
     if save_video:
 
         video_out = imageio.get_writer(path+'.mp4', mode='I', fps=60, codec='libx264')
-        for grad_change in np.arange(0, 1, 0.02)*edit_strength:
+        for grad_change in np.arange(0, 1, 0.005)*edit_strength:
 
             with torch.no_grad():
                 img = forward_synthesis(G, styles + direction*grad_change)

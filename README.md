@@ -116,11 +116,11 @@ and
 python gen_video.py --output=lerp.mp4 --trunc=0.7 --seeds=0-31 --grid=4x2 \
   --network=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/pokemon256.pkl
 ```
-For class-conditional models, you can pass the class index via ```--class```, a index-to-label dictionary for Imagenet can be found [here](https://github.com/autonomousvision/stylegan_xl/blob/main/media/imagenet_idx2labels.txt).
+For class-conditional models, you can pass the class index via ```--class```, a index-to-label dictionary for Imagenet can be found [here](https://github.com/autonomousvision/stylegan_xl/blob/main/media/imagenet_idx2labels.txt). For interpolation between classes, provide, e.g., ```--cls=0-31``` to  ```gen_video.py```. The list of classes has to be the same length as ```--seeds```.
 
 To generate a conditional sample sheet, run
 ```
-python gen_samplesheet.py --outdir=sample_sheets --trunc=1.0 \
+python gen_class_samplesheet.py --outdir=sample_sheets --trunc=1.0 \
   --network=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet128.pkl \
   --samples-per-class 4 --classes 0-32 --grid-width 32
 ```

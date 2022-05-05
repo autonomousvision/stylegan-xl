@@ -22,6 +22,7 @@ import torch
 from tqdm import tqdm
 
 import legacy
+from torch_utils import gen_utils
 
 #----------------------------------------------------------------------------
 
@@ -43,7 +44,7 @@ def layout_grid(img, grid_w=None, grid_h=1, float_to_uint8=True, chw_to_hwc=True
 
 #----------------------------------------------------------------------------
 
-def gen_interp_video(G, mp4: str, seeds, shuffle_seed=None, w_frames=60*4, kind='cubic', grid_dims=(1,1), num_keyframes=None, wraps=2, psi=1, device=torch.device('cuda'), class_idx=None, **video_kwargs):
+def gen_interp_video(G, mp4: str, seeds, shuffle_seed=None, w_frames=60*4, kind='cubic', grid_dims=(1,1), num_keyframes=None, wraps=2, truncation_psi=1, device=torch.device('cuda'), centroids_path=None, class_idx=None, **video_kwargs):
     grid_w = grid_dims[0]
     grid_h = grid_dims[1]
 
@@ -60,18 +61,20 @@ def gen_interp_video(G, mp4: str, seeds, shuffle_seed=None, w_frames=60*4, kind=
         rng = np.random.RandomState(seed=shuffle_seed)
         rng.shuffle(all_seeds)
 
-    zs = torch.from_numpy(np.stack([np.random.RandomState(seed).randn(G.z_dim) for seed in all_seeds])).to(device)
-    # Labels.
-    label = torch.zeros([zs.size(0), G.c_dim], device=device)
-    if G.c_dim != 0:
-        if class_idx is None:
-            raise click.ClickException('Must specify class label with --class when using a conditional network')
-        label[:, class_idx] = 1
-    else:
-        if class_idx is not None:
-            print ('warn: --class=lbl ignored when running on an unconditional network')
+    if class_idx is None:
+        class_idx = [None] * len(seeds)
+    elif len(class_idx) == 1:
+        class_idx = [class_idx] * len(seeds)
+    assert len(all_seeds) == len(class_idx), "Seeds and class-idx should have the same length"
 
-    ws = G.mapping(z=zs, c=label, truncation_psi=psi)
+    ws = []
+    for seed, cls in zip(all_seeds, class_idx):
+        ws.append(
+            gen_utils.get_w_from_seed(G, 1, device, truncation_psi, seed=seed,
+                                      centroids_path=centroids_path, class_idx=cls)
+        )
+    ws = torch.cat(ws)
+
     _ = G.synthesis(ws[:1]) # warm up
     ws = ws.reshape(grid_h, grid_w, num_keyframes, *ws.shape[1:])
 
@@ -142,18 +145,20 @@ def parse_tuple(s: Union[str, Tuple[int,int]]) -> Tuple[int, int]:
 @click.option('--num-keyframes', type=int, help='Number of seeds to interpolate through.  If not specified, determine based on the length of the seeds array given by --seeds.', default=None)
 @click.option('--w-frames', type=int, help='Number of frames to interpolate between latents', default=120)
 @click.option('--trunc', 'truncation_psi', type=float, help='Truncation psi', default=1, show_default=True)
+@click.option('--centroids-path', type=str, help='Pass path to precomputed centroids to enable multimodal truncation')
 @click.option('--output', help='Output .mp4 filename', type=str, required=True, metavar='FILE')
-@click.option('--class', 'class_idx', type=int, help='Class label (unconditional if not specified)')
+@click.option('--class', 'class_idx', type=parse_range, help='Class label (unconditional if not specified)')
 def generate_images(
     network_pkl: str,
     seeds: List[int],
     shuffle_seed: Optional[int],
     truncation_psi: float,
+    centroids_path: str,
     grid: Tuple[int,int],
     num_keyframes: Optional[int],
     w_frames: int,
     output: str,
-    class_idx: Optional[int],
+    class_idx: Optional[List[int]],
 ):
     """Render a latent vector interpolation video.
 
@@ -182,7 +187,7 @@ def generate_images(
     with dnnlib.util.open_url(network_pkl) as f:
         G = legacy.load_network_pkl(f)['G_ema'].to(device) # type: ignore
 
-    gen_interp_video(G=G, mp4=output, bitrate='12M', grid_dims=grid, num_keyframes=num_keyframes, w_frames=w_frames, seeds=seeds, shuffle_seed=shuffle_seed, psi=truncation_psi, class_idx=class_idx)
+    gen_interp_video(G=G, mp4=output, bitrate='12M', grid_dims=grid, num_keyframes=num_keyframes, w_frames=w_frames, seeds=seeds, shuffle_seed=shuffle_seed, truncation_psi=truncation_psi, centroids_path=centroids_path, class_idx=class_idx)
 
 #----------------------------------------------------------------------------
 
