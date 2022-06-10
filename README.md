@@ -34,12 +34,6 @@ If you find our code or paper useful, please cite
 - StyleGAN-XL + CLIP (Implemented by CasualGANPapers) &nbsp;-&nbsp;  [![StyleGAN-XL + CLIP](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/CasualGANPapers/unconditional-StyleGANXL-CLIP/blob/main/StyleganXL%2BCLIP.ipynb)
 - StyleGAN-XL + CLIP (Modified by Katherine Crowson to optimize in W+ space) &nbsp;-&nbsp; [![StyleGAN-XL + CLIP](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1ZEnJE-EUnh-aCXJbu0kVhi8_Qdi2BV-S)
 
-## ToDos
-- [x] Initial code release
-- [x] Add pretrained models (ImageNet{16,32,64,128,256,512,1024}, FFHQ{256,512,1024}, Pokemon{256,512,1024})
-- [x] Add StyleMC for editing
-- [ ] Add PTI for inversion
-
 ## Requirements ##
 - 64-bit Python 3.8 and PyTorch 1.9.0 (or later). See https://pytorch.org for PyTorch install instructions.
 - CUDA toolkit 11.1 or later.
@@ -133,6 +127,22 @@ GAN](https://self-distilled-stylegan.github.io/)). We generated 600k find 10k cl
 |No Truncation| Uni-Modal Truncation | Multi-Modal Truncation
 :---  |  :---:  |  :---:
 <img src="media/no_truncation.png"> | <img src="media/unimodal_truncation.png">| <img src="media/multimodal_truncation.png">
+
+## Image Inversion ##
+<p align="center">
+  <img src="media/inversion.gif" width="60%">
+</p>
+
+To invert a given image via latent optimization, and optionally use our reimplementation of [Pivotal Tuning Inversion](https://arxiv.org/abs/2106.05744), run
+
+```
+python run_inversion.py --outdir=inversion_out \
+  --target media/jay.png \
+  --inv-steps 1000 --run-pti --pti-steps 350 \
+  --network=https://s3.eu-central-1.amazonaws.com/avg-projects/stylegan_xl/models/imagenet512.pkl
+```
+
+Provide an image via ```target```, it is automatically resized and center-cropped to match the generator network. You do not need to provide a class for ImageNet models, we infer the class of a given sample via a pretrained classifier.
 
 ## Image Editing ##
 <img src="media/editing_banner.png">
