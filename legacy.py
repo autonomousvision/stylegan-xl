@@ -11,6 +11,7 @@
 import io
 import click
 import pickle
+import dill
 import re
 import copy
 import numpy as np
@@ -64,7 +65,7 @@ def load_network_pkl(f, force_fp16=False):
 class _TFNetworkStub(dnnlib.EasyDict):
     pass
 
-class _LegacyUnpickler(pickle.Unpickler):
+class _LegacyUnpickler(dill.Unpickler):
     def find_class(self, module, name):
         if module == 'dnnlib.tflib.network' and name == 'Network':
             return _TFNetworkStub
