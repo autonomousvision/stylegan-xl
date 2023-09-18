@@ -258,6 +258,7 @@ class MappingNetwork(torch.nn.Module):
         activation      = 'lrelu',  # Activation function: 'relu', 'lrelu', etc.
         lr_multiplier   = 0.01,     # Learning rate multiplier for the mapping layers.
         w_avg_beta      = 0.998,    # Decay for tracking the moving average of W during training, None = do not track.
+        **mapping_kwargs
     ):
         super().__init__()
         self.z_dim = z_dim
@@ -342,6 +343,7 @@ class SynthesisLayer(torch.nn.Module):
         resample_filter = [1,3,3,1],    # Low-pass filter to apply when resampling activations.
         conv_clamp      = None,         # Clamp the output of convolution layers to +-X, None = disable clamping.
         channels_last   = False,        # Use channels_last format for the weights?
+        **synthesis_kwargs
     ):
         super().__init__()
         self.in_channels = in_channels
