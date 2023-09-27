@@ -462,7 +462,8 @@ def get_w_from_seed(G, batch_sz, device, truncation_psi=1.0, seed=None, centroid
         dist = torch.norm(w_centroids - w[:, :1], dim=2, p=2)
         w_avg = w_centroids[0].index_select(0, dist.argmin(1))
 
-    w_avg = w_avg.unsqueeze(1).repeat(1, G.mapping.num_ws, 1)
+    w_avg = w_avg.unsqueeze(-1).repeat(1, w.shape[1]).unsqueeze(-1)
+
     w = w_avg + (w - w_avg) * truncation_psi
 
     return w
