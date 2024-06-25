@@ -16,9 +16,8 @@ import copy
 import numpy as np
 import torch
 import dnnlib
-from torch_utils import misc
+from  stylegan-xl.torch_utils import misc
 import io
-
 #----------------------------------------------------------------------------
 
 def load_network_pkl(f, force_fp16=False):
